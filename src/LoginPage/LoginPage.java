@@ -13,6 +13,7 @@ public class LoginPage {
     private JTextField textField1;
     private JButton entrarButton;
 
+// construção da tela de login
     public LoginPage() {
         JFrame frame = new JFrame("Biblioteca Twitter");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

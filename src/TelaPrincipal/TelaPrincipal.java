@@ -1,5 +1,10 @@
 package TelaPrincipal;
 
+import Model.Book;
+import Model.Client;
+import Excecoes.Excecoes;
+import Excecoes.LivroJaEmprestadoException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,146 +13,190 @@ import java.util.ArrayList;
 
 public class TelaPrincipal {
     private JFrame frame;
-    private JPanel mainPanel;
-    private JPanel bookPanel;
-    private JPanel clientPanel;
-    private JTextField bookTitleField;
-    private JTextField bookAuthorField;
-    private JButton addBookBtn;
-    private JTextField clientNameField;
-    private JTextField clientEmailField;
-    private JButton addClientBtn;
-    private JButton showListBtn;
-
-    // Listas para armazenar os livros e clientes
-    private ArrayList<String> bookList;
-    private ArrayList<String> clientList;
+    private ArrayList<Book> bookList;
+    private ArrayList<Client> clientList;
     private JPanel panel1;
     private JButton sairButton;
 
     public TelaPrincipal() {
-        // Inicializando as listas
         bookList = new ArrayList<>();
         clientList = new ArrayList<>();
 
         frame = new JFrame("Tela Principal");
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(3, 1)); // Dividido em três partes: livros, clientes e botão de lista
+        JPanel mainPanel = new JPanel(new GridLayout(5, 1));
 
-        // Painel de livros
-        bookPanel = new JPanel();
-        bookPanel.setLayout(new GridLayout(3, 2));
-        bookPanel.setBorder(BorderFactory.createTitledBorder("Cadastrar Livro"));
-
+        // Painel de Cadastro de Livros
+        JPanel bookPanel = new JPanel(new GridLayout(2, 2));
         JLabel bookTitleLbl = new JLabel("Título:");
-        bookTitleField = new JTextField();
+        JTextField bookTitleField = new JTextField();
         JLabel bookAuthorLbl = new JLabel("Autor:");
-        bookAuthorField = new JTextField();
-        addBookBtn = new JButton("Add Livro");
-
+        JTextField bookAuthorField = new JTextField();
+        JButton addBookBtn = new JButton("Add Livro");
         bookPanel.add(bookTitleLbl);
         bookPanel.add(bookTitleField);
         bookPanel.add(bookAuthorLbl);
         bookPanel.add(bookAuthorField);
         bookPanel.add(addBookBtn);
 
-        // Painel de clientes
-        clientPanel = new JPanel();
-        clientPanel.setLayout(new GridLayout(3, 2));
-        clientPanel.setBorder(BorderFactory.createTitledBorder("Cadastrar Cliente"));
-
+        // Painel de Cadastro de Clientes
+        JPanel clientPanel = new JPanel(new GridLayout(2, 2));
         JLabel clientNameLbl = new JLabel("Nome:");
-        clientNameField = new JTextField();
+        JTextField clientNameField = new JTextField();
         JLabel clientEmailLbl = new JLabel("Email:");
-        clientEmailField = new JTextField();
-        addClientBtn = new JButton("Add Cliente");
-
+        JTextField clientEmailField = new JTextField();
+        JButton addClientBtn = new JButton("Add Cliente");
         clientPanel.add(clientNameLbl);
         clientPanel.add(clientNameField);
         clientPanel.add(clientEmailLbl);
         clientPanel.add(clientEmailField);
         clientPanel.add(addClientBtn);
 
-        // Botão para exibir a lista de livros e clientes
-        showListBtn = new JButton("Exibir Listas");
+        // Botões de Empréstimo e Devolução
+        JButton loanBookBtn = new JButton("Emprestar Livro");
+        JButton returnBookBtn = new JButton("Devolver Livro");
+        JButton showListBtn = new JButton("Exibir Listas");
 
         // Adiciona os painéis ao painel principal
         mainPanel.add(bookPanel);
         mainPanel.add(clientPanel);
+        mainPanel.add(loanBookBtn);
+        mainPanel.add(returnBookBtn);
         mainPanel.add(showListBtn);
 
-        // Configura a janela
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(mainPanel);
         frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
-        frame.add(mainPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        // Ação do botão para adicionar livros
+        // Ação para adicionar livros
         addBookBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String title = bookTitleField.getText();
-                String author = bookAuthorField.getText();
-                if (title.isEmpty() || author.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Preencha todos os campos do livro.");
-                } else {
-                    String livro = "Título: " + title + ", Autor: " + author;
-                    bookList.add(livro); // Adiciona o livro à lista
-                    JOptionPane.showMessageDialog(frame, "Livro adicionado: " + livro);
+                try {
+                    String title = bookTitleField.getText();
+                    String author = bookAuthorField.getText();
+                    if (title.isEmpty() || author.isEmpty()) {
+                        throw new IllegalArgumentException("Preencha todos os campos do livro.");
+                    }
+                    bookList.add(new Book(title, author));
+                    JOptionPane.showMessageDialog(frame, "Livro adicionado!");
+                } catch (Exception ex) {
+                    Excecoes.tratar(ex);
                 }
             }
         });
 
-        // Ação do botão para adicionar clientes
+        // Ação para adicionar clientes
         addClientBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String name = clientNameField.getText();
-                String email = clientEmailField.getText();
-                if (name.isEmpty() || email.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Preencha todos os campos do cliente.");
-                } else {
-                    String cliente = "Nome: " + name + ", Email: " + email;
-                    clientList.add(cliente); // Adiciona o cliente à lista
-                    JOptionPane.showMessageDialog(frame, "Cliente adicionado: " + cliente);
+                try {
+                    String name = clientNameField.getText();
+                    String email = clientEmailField.getText();
+                    if (name.isEmpty() || email.isEmpty()) {
+                        throw new IllegalArgumentException("Preencha todos os campos do cliente.");
+                    }
+                    clientList.add(new Client(name, email));
+                    JOptionPane.showMessageDialog(frame, "Cliente adicionado!");
+                } catch (Exception ex) {
+                    Excecoes.tratar(ex);
                 }
             }
         });
 
-        // Ação do botão para exibir a lista de livros e clientes
+        // Ação para emprestar livro
+        loanBookBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String bookTitle = JOptionPane.showInputDialog(frame, "Título do livro:");
+                    String clientName = JOptionPane.showInputDialog(frame, "Nome do cliente:");
+                    Book book = findBookByTitle(bookTitle);
+                    Client client = findClientByName(clientName);
+
+                    if (book == null || client == null) {
+                        throw new Exception("Livro ou cliente não encontrados.");
+                    }
+                    if (book.isLoaned()) {
+                        throw new LivroJaEmprestadoException();
+                    }
+                    book.loanTo(client);
+                    JOptionPane.showMessageDialog(frame, "Livro emprestado com sucesso!");
+                } catch (Exception ex) {
+                    Excecoes.tratar(ex);
+                }
+            }
+        });
+
+        // Ação para devolver livro
+        returnBookBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String bookTitle = JOptionPane.showInputDialog(frame, "Título do livro:");
+                    Book book = findBookByTitle(bookTitle);
+
+                    if (book == null) {
+                        throw new Exception("Livro não encontrado.");
+                    }
+                    if (!book.isLoaned()) {
+                        throw new Exception("O livro não está emprestado.");
+                    }
+                    book.returnBook();
+                    JOptionPane.showMessageDialog(frame, "Livro devolvido com sucesso!");
+                } catch (Exception ex) {
+                    Excecoes.tratar(ex);
+                }
+            }
+        });
+
+        // Ação para exibir listas
         showListBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showList(); // Chama o método para mostrar a lista
+                showList();
             }
         });
     }
 
-    // Método que exibe a nova janela com a lista de livros e clientes
+    // Métodos auxiliares para encontrar livro ou cliente
+    private Book findBookByTitle(String title) {
+        for (Book book : bookList) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    private Client findClientByName(String name) {
+        for (Client client : clientList) {
+            if (client.getName().equalsIgnoreCase(name)) {
+                return client;
+            }
+        }
+        return null;
+    }
+
     private void showList() {
         JFrame listFrame = new JFrame("Lista de Livros e Clientes");
-        listFrame.setSize(400, 300);
-        listFrame.setLocationRelativeTo(null);
-
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
 
-        // Preenche a área de texto com os livros e clientes cadastrados
-        textArea.append("Livros cadastrados:\n");
-        for (String livro : bookList) {
-            textArea.append(livro + "\n");
+        textArea.append("Livros:\n");
+        for (Book book : bookList) {
+            textArea.append(book + "\n");
+        }
+        textArea.append("\nClientes:\n");
+        for (Client client : clientList) {
+            textArea.append(client + "\n");
         }
 
-        textArea.append("\nClientes cadastrados:\n");
-        for (String cliente : clientList) {
-            textArea.append(cliente + "\n");
-        }
-
-        // Coloca a área de texto dentro de um JScrollPane para permitir rolagem
         JScrollPane scrollPane = new JScrollPane(textArea);
         listFrame.add(scrollPane);
-
+        listFrame.setSize(400, 300);
+        listFrame.setLocationRelativeTo(null);
         listFrame.setVisible(true);
     }
 }
